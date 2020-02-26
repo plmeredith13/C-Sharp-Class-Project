@@ -1,13 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using src;
 
 namespace plmeredith13.CodeLou.ExerciseProject
 {
     class Program
     {
-        static List<Student> studentsList = new List<Student>();
+        static string _studentRepositoryPath = $"{AppDomain.CurrentDomain.BaseDirectory}\\students.json";
+        static List<Student> studentsList = File.Exists(_studentRepositoryPath) ? Read() : new List<Student>();
+        private static void Save()
+        {
+            using (var file = File.CreateText(_studentRepositoryPath))
+            {
+                file.WriteAsync(JsonSerializer.Serialize(studentsList));
+            }
+        }
+        static List<Student> Read()
+        {
+            return JsonSerializer.Deserialize<List<Student>>(File.ReadAllText(_studentRepositoryPath));
+        }
+        //static List<Student> studentsList = new List<Student>();
 
         static void Main(string[] args)
         {
@@ -39,7 +54,7 @@ namespace plmeredith13.CodeLou.ExerciseProject
 
         private static void DisplayStudents(IEnumerable<Student> students)
         {
-            if (students.Any()) 
+            if (students.Any())
             {
                 Console.WriteLine($"Student Id | Name |  Class ");
                 studentsList.ForEach(x =>
@@ -47,13 +62,13 @@ namespace plmeredith13.CodeLou.ExerciseProject
                     Console.WriteLine(x.StudentDisplay);
                 });
             }
-            else 
+            else
             {
                 System.Console.WriteLine("No students found.");
             }
         }
 
-        private static void DisplayStudents() => DisplayStudents(studentsList);       
+        private static void DisplayStudents() => DisplayStudents(studentsList);
 
         private static void SearchStudents()
         {
@@ -72,17 +87,17 @@ namespace plmeredith13.CodeLou.ExerciseProject
             Console.WriteLine("3: Search for student by name");
             Console.WriteLine("4: Exit");
         }
-        
+
         static void InputStudent()
         {
             var student = new Student();
-            while (true) 
+            while (true)
             {
                 Console.WriteLine("Enter Student Id");
                 var studentIdSuccessful = int.TryParse(Console.ReadLine(), out var studentId);
-                if (studentIdSuccessful) 
+                if (studentIdSuccessful)
                 {
-                    student.StudentId = studentId;    
+                    student.StudentId = studentId;
                     break;
                 }
             }
@@ -94,23 +109,29 @@ namespace plmeredith13.CodeLou.ExerciseProject
             student.ClassName = Console.ReadLine();
             Console.WriteLine("Enter Last Class Completed");
             student.LastClassCompleted = Console.ReadLine();
-            while (true) {
+            while (true)
+            {
                 Console.WriteLine("Enter Last Class Completed Date in format MM/dd/YYYY");
                 var lastCompletedOnSuccessful = DateTimeOffset.TryParse(Console.ReadLine(), out var lastClassCompletedOn);
-                if (lastCompletedOnSuccessful) {
+                if (lastCompletedOnSuccessful)
+                {
                     student.LastClassCompletedOn = lastClassCompletedOn;
                     break;
                 }
-            } 
-            while (true) {
+            }
+            while (true)
+            {
                 Console.WriteLine("Enter Start Date in format MM/dd/YYYY");
                 var startDateSuccessful = DateTimeOffset.TryParse(Console.ReadLine(), out var startDate);
-                if (startDateSuccessful) {
+                if (startDateSuccessful)
+                {
                     student.StartDate = startDate;
                     break;
                 }
-            } 
+            }
             studentsList.Add(student);
+            Save();
         }
+
     }
 }
